@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2046
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "simTim", "simTim\simTim.csproj", "{CA9D5303-2EAD-43C5-8BA1-7567899C16A6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CA9D5303-2EAD-43C5-8BA1-7567899C16A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA9D5303-2EAD-43C5-8BA1-7567899C16A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA9D5303-2EAD-43C5-8BA1-7567899C16A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA9D5303-2EAD-43C5-8BA1-7567899C16A6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F0983516-88FA-4AE4-BC58-4DADB32211E8}
+	EndGlobalSection
+EndGlobal
