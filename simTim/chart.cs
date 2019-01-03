@@ -465,7 +465,7 @@ namespace simTim
                             fread.Read(b, 0, (int)number);
                             resendend: this.fileskt.Send(b);
                             this.fileskt.Receive(controlrecv);
-                            if(Encoding.ASCII.GetString(controlrecv)!="OK")
+                            if(Encoding.ASCII.GetString(controlrecv,0,2)!="OK")
                             {
                                 goto resendend;
                             }
