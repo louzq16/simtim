@@ -34,6 +34,8 @@
             this.textBox_input = new System.Windows.Forms.TextBox();
             this.label_hint = new System.Windows.Forms.Label();
             this.button_sendfile = new System.Windows.Forms.Button();
+            this.progressBar_file = new System.Windows.Forms.ProgressBar();
+            this.progressBar_recvfile = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
             // 
             // button_send
@@ -93,11 +95,27 @@
             this.button_sendfile.UseVisualStyleBackColor = true;
             this.button_sendfile.Click += new System.EventHandler(this.button_sendfile_Click);
             // 
+            // progressBar_file
+            // 
+            this.progressBar_file.Location = new System.Drawing.Point(616, 40);
+            this.progressBar_file.Name = "progressBar_file";
+            this.progressBar_file.Size = new System.Drawing.Size(172, 23);
+            this.progressBar_file.TabIndex = 6;
+            // 
+            // progressBar_recvfile
+            // 
+            this.progressBar_recvfile.Location = new System.Drawing.Point(616, 110);
+            this.progressBar_recvfile.Name = "progressBar_recvfile";
+            this.progressBar_recvfile.Size = new System.Drawing.Size(172, 23);
+            this.progressBar_recvfile.TabIndex = 7;
+            // 
             // chart
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 397);
+            this.Controls.Add(this.progressBar_recvfile);
+            this.Controls.Add(this.progressBar_file);
             this.Controls.Add(this.button_sendfile);
             this.Controls.Add(this.label_hint);
             this.Controls.Add(this.textBox_input);
@@ -120,5 +138,7 @@
         private System.Windows.Forms.TextBox textBox_input;
         private System.Windows.Forms.Label label_hint;
         private System.Windows.Forms.Button button_sendfile;
+        private System.Windows.Forms.ProgressBar progressBar_file;
+        private System.Windows.Forms.ProgressBar progressBar_recvfile;
     }
 }

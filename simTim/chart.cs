@@ -291,133 +291,149 @@ namespace simTim
         }
         private void recvfiletrans()
         {
-            byte[] controlrecv = new byte[100];
-            int length = 0;
-            string rcfmsg = null;
-            try
+            lock(this.progressBar_recvfile)
             {
-                length = this.fileskt.Receive(controlrecv);
-                rcfmsg = Encoding.UTF8.GetString(controlrecv, 0, length);
-            }
-            catch(Exception e)
-            {
-                MessageBox.Show(e.Message);
-            }
-            if(rcfmsg.Substring(0,4)=="want")
-            {
-                string[] tem=rcfmsg.Split('?');
-                // byte[] recv = new byte[long.Parse(tem[2])];
-                FileStream fs = new FileStream(tem[1], FileMode.Create);
-                this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
-                byte[] temrecv = new byte[300 * 1024];
-                long number = long.Parse(tem[2]) / (256 * 1024);
-                for(long i=0;i<number;i++)
+                byte[] controlrecv = new byte[100];
+                int length = 0;
+                string rcfmsg = null;
+                try
                 {
-                    length=this.fileskt.Receive(temrecv);
-                    fs.Write(temrecv, 0, 256 * 1024);
+                    length = this.fileskt.Receive(controlrecv);
+                    rcfmsg = Encoding.UTF8.GetString(controlrecv, 0, length);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                }
+                if (rcfmsg.Substring(0, 4) == "want")
+                {
+                    string[] tem = rcfmsg.Split('?');
+                    // byte[] recv = new byte[long.Parse(tem[2])];
+                    FileStream fs = new FileStream(tem[1], FileMode.Create);
                     this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
-                }
-                number = long.Parse(tem[2]) % (256 * 1024);
-                Array.Clear(temrecv, 0, temrecv.Length);
-                int recvnumber;
-                switch (number)
-                {
-                    case 1:
-                        while (true)
-                        {
-                            recvnumber = this.fileskt.Receive(temrecv);
-                            if (recvnumber > 1)
+                    byte[] temrecv = new byte[300 * 1024];
+                    long number = long.Parse(tem[2]) / (256 * 1024);
+                    this.progressBar_recvfile.Maximum = (int)number + 1;
+                    for (long i = 0; i < number; i++)
+                    {
+                        length = this.fileskt.Receive(temrecv);
+                        fs.Write(temrecv, 0, 256 * 1024);
+                        this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
+                        this.progressBar_recvfile.Value++;
+                    }
+                    number = long.Parse(tem[2]) % (256 * 1024);
+                    Array.Clear(temrecv, 0, temrecv.Length);
+                    int recvnumber;
+                    switch (number)
+                    {
+                        case 1:
+                            while (true)
                             {
-                                fs.Close();
-                                this.fileskt.Close();
-                                break;
+                                recvnumber = this.fileskt.Receive(temrecv);
+                                if (recvnumber > 1)
+                                {
+                                    fs.Close();
+                                    this.fileskt.Close();
+                                    break;
+                                }
+                                else
+                                {
+                                    fs.Write(temrecv, 0, 1);
+                                    this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
+                                }
                             }
-                            else
+                            break;
+                        default:
+                            while (true)
                             {
-                                fs.Write(temrecv, 0, 1);
-                                this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
+                                recvnumber = this.fileskt.Receive(temrecv);
+                                if (recvnumber == 1)
+                                {
+                                    fs.Close();
+                                    this.fileskt.Close();
+                                    break;
+                                }
+                                else
+                                {
+                                    fs.Write(temrecv, 0, (int)number);
+                                    this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
+                                }
                             }
-                        }
-                        break;
-                    default:
-                        while (true)
-                        {
-                            recvnumber = this.fileskt.Receive(temrecv);
-                            if (recvnumber == 1)
-                            {
-                                fs.Close();
-                                this.fileskt.Close();
-                                break;
-                            }
-                            else
-                            {
-                                fs.Write(temrecv, 0, (int)number);
-                                this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
-                            }
-                        }
-                        break;
-                }
+                            break;
+                    }
 
+                }
+                else
+                {
+                    this.fileskt.Send(Encoding.UTF8.GetBytes("NO"));
+                    this.fileskt.Shutdown(SocketShutdown.Both);
+                }
             }
-            else
-            {
-                this.fileskt.Send(Encoding.UTF8.GetBytes("NO"));
-                this.fileskt.Shutdown(SocketShutdown.Both);
-            }
+            
         }
         private  void sendfiletrans()
         {
-            System.IO.FileInfo fileinfo = new System.IO.FileInfo(filepath);
-            long filesize = fileinfo.Length;
-            byte[] controlrecv = new byte[100];
+            lock(this.progressBar_file)
+            {
+                System.IO.FileInfo fileinfo = new System.IO.FileInfo(filepath);
+                long filesize = fileinfo.Length;
+                byte[] controlrecv = new byte[100];
+                this.progressBar_file.Maximum = (int)(filesize / (256.0 * 1024))+1;
+                lock (this.progressBar_file)
+                {
+
+                }
+                string rcvmsg = null;
+                int length;
+                this.fileskt.Send(Encoding.UTF8.GetBytes("want?" + this.filename + "?" + filesize));
+                length = this.fileskt.Receive(controlrecv);
+                rcvmsg = Encoding.UTF8.GetString(controlrecv, 0, length);
+                if (rcvmsg == "OK")
+                {
+                    FileStream fread = new FileStream(filepath, FileMode.Open);
+                    long number = filesize / (256 * 1024);
+                    long offset = 0;
+                    byte[] readbyte = new byte[256 * 1024];
+                    for (long i = 0; i < number; i++)
+                    {
+                        fread.Read(readbyte, 0, 256 * 1024);
+                        this.fileskt.Send(readbyte);
+                        this.fileskt.Receive(controlrecv);
+                        this.progressBar_file.Value++;
+                    }
+                    number = filesize % (256 * 1024);
+                    switch (number)
+                    {
+                        case 0:
+                            this.fileskt.Send(Encoding.ASCII.GetBytes("@"));
+                            this.fileskt.Shutdown(SocketShutdown.Both);
+                            this.fileskt.Close();
+                            fread.Close();
+                            break;
+                        case 1:
+                            byte[] a = new byte[1];
+                            fread.Read(a, 0, 1);
+                            this.fileskt.Send(a);
+                            this.fileskt.Receive(controlrecv);
+                            this.fileskt.Send(Encoding.ASCII.GetBytes("@@"));
+                            this.fileskt.Shutdown(SocketShutdown.Both);
+                            this.fileskt.Close();
+                            fread.Close();
+                            break;
+                        default:
+                            byte[] b = new byte[number];
+                            fread.Read(b, 0, (int)number);
+                            this.fileskt.Send(b);
+                            this.fileskt.Receive(controlrecv);
+                            goto case 0;
+                    }
+                }
+                else
+                {
+                }
+            }
             
-            string rcvmsg = null;
-            int length;
-            this.fileskt.Send(Encoding.UTF8.GetBytes("want?" + this.filename + "?" + filesize));
-            length = this.fileskt.Receive(controlrecv);
-            rcvmsg = Encoding.UTF8.GetString(controlrecv, 0, length);
-            if(rcvmsg=="OK")
-            {
-                FileStream fread = new FileStream(filepath, FileMode.Open);
-                long number = filesize / (256 * 1024);
-                long offset = 0;
-                byte[] readbyte = new byte[256 * 1024];
-                for(long i=0;i<number;i++)
-                {
-                    fread.Read(readbyte, 0, 256 * 1024);
-                    this.fileskt.Send(readbyte);
-                    this.fileskt.Receive(controlrecv);
-                }
-                number = filesize % (256 * 1024);
-                switch (number)
-                {
-                    case 0:
-                        this.fileskt.Send(Encoding.ASCII.GetBytes("@"));
-                        this.fileskt.Shutdown(SocketShutdown.Both);
-                        this.fileskt.Close();
-                        fread.Close();
-                        break;
-                    case 1:
-                        byte[] a = new byte[1];
-                        fread.Read(a, 0, 1);
-                        this.fileskt.Send(a);
-                        this.fileskt.Receive(controlrecv);
-                        this.fileskt.Send(Encoding.ASCII.GetBytes("@@"));
-                        this.fileskt.Shutdown(SocketShutdown.Both);
-                        this.fileskt.Close();
-                        fread.Close();
-                        break;
-                    default:
-                        byte[] b = new byte[number];
-                        fread.Read(b, 0,(int)number );
-                        this.fileskt.Send(b);
-                        this.fileskt.Receive(controlrecv);
-                        goto case 0;
-                }
-            }
-            else
-            {
-            }
+           
         }
 
         private void send(Socket s,string ss)
