@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.28010.2046
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "simTim", "simTim\simTim.csproj", "{CA9D5303-2EAD-43C5-8BA1-7567899C16A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model", "Model\Model.csproj", "{8BA0A4C6-2A04-47EC-A36D-FF7FA1EA75D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLL", "BLL\BLL.csproj", "{3E8123C4-9412-4557-B420-390E7D7CFF4E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{CA9D5303-2EAD-43C5-8BA1-7567899C16A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA9D5303-2EAD-43C5-8BA1-7567899C16A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA9D5303-2EAD-43C5-8BA1-7567899C16A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BA0A4C6-2A04-47EC-A36D-FF7FA1EA75D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BA0A4C6-2A04-47EC-A36D-FF7FA1EA75D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BA0A4C6-2A04-47EC-A36D-FF7FA1EA75D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BA0A4C6-2A04-47EC-A36D-FF7FA1EA75D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E8123C4-9412-4557-B420-390E7D7CFF4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E8123C4-9412-4557-B420-390E7D7CFF4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E8123C4-9412-4557-B420-390E7D7CFF4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E8123C4-9412-4557-B420-390E7D7CFF4E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
