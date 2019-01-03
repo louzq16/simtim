@@ -320,9 +320,9 @@ namespace simTim
                     for (long i = 0; i < number; i++)
                     {
                         length = this.fileskt.Receive(temrecv);
-                        Console.WriteLine(length);
+                        Console.WriteLine(length+" "+ Convert.ToString(i));
                         fs.Write(temrecv, 0, 256 * 1024);
-                        this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
+                        this.fileskt.Send(Encoding.UTF8.GetBytes("OK"+Convert.ToString(i)));
                         this.progressBar_recvfile.Value++;
                     }
                     number = long.Parse(tem[2]) % (256 * 1024);
@@ -338,12 +338,14 @@ namespace simTim
                                 {
                                     fs.Close();
                                     this.fileskt.Close();
+                                    Console.WriteLine("recv ok");
                                     break;
                                 }
                                 else
                                 {
                                     fs.Write(temrecv, 0, 1);
                                     this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
+                                    Console.WriteLine(recvnumber );
                                 }
                             }
                             break;
@@ -355,12 +357,14 @@ namespace simTim
                                 {
                                     fs.Close();
                                     this.fileskt.Close();
+                                    Console.WriteLine("recv ok");
                                     break;
                                 }
                                 else
                                 {
                                     fs.Write(temrecv, 0, (int)number);
                                     this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
+                                    Console.WriteLine(recvnumber);
                                 }
                             }
                             break;
@@ -372,6 +376,7 @@ namespace simTim
                     this.fileskt.Send(Encoding.UTF8.GetBytes("NO"));
                     this.fileskt.Shutdown(SocketShutdown.Both);
                 }
+                this.progressBar_recvfile.Value = 0;
             }
             
         }
@@ -437,6 +442,7 @@ namespace simTim
                 else
                 {
                 }
+                this.progressBar_recvfile.Value = 0;
             }
             
            
