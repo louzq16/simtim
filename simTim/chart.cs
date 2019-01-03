@@ -51,7 +51,7 @@ namespace simTim
             this.friendsIP = IP;
             this.port = pt;
             this.label_hint.Text = "对方离线";
-            Control.CheckForIllegalCrossThreadCalls = false;
+            Control.CheckForIllegalCrossThreadCalls = false;//可以跨线程使用控件
         }
 
         public void changesockets(Socket nclskt,string premsg)
