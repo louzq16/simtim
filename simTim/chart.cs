@@ -315,10 +315,12 @@ namespace simTim
                     this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
                     byte[] temrecv = new byte[300 * 1024];
                     long number = long.Parse(tem[2]) / (256 * 1024);
+                    Console.WriteLine(number);
                     this.progressBar_recvfile.Maximum = (int)number + 1;
                     for (long i = 0; i < number; i++)
                     {
                         length = this.fileskt.Receive(temrecv);
+                        Console.WriteLine(length);
                         fs.Write(temrecv, 0, 256 * 1024);
                         this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
                         this.progressBar_recvfile.Value++;
@@ -394,6 +396,7 @@ namespace simTim
                 {
                     FileStream fread = new FileStream(filepath, FileMode.Open);
                     long number = filesize / (256 * 1024);
+                    Console.WriteLine(number);
                     long offset = 0;
                     byte[] readbyte = new byte[256 * 1024];
                     for (long i = 0; i < number; i++)
@@ -401,6 +404,7 @@ namespace simTim
                         fread.Read(readbyte, 0, 256 * 1024);
                         this.fileskt.Send(readbyte);
                         this.fileskt.Receive(controlrecv);
+                        Console.WriteLine(Encoding.UTF8.GetString(controlrecv, 0, 10));
                         this.progressBar_file.Value++;
                     }
                     number = filesize % (256 * 1024);
