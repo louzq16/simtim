@@ -442,7 +442,7 @@ namespace simTim
                 else
                 {
                 }
-                this.progressBar_recvfile.Value = 0;
+                this.progressBar_file.Value = 0;
             }
             
            
