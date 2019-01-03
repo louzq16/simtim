@@ -41,6 +41,7 @@ namespace simTim
             port = getport(cn);
             this.rcv_add_rtb(premsg.Substring(17), premsg.Substring(0, 16));
             this.label_hint.Text = "对方在线";
+            Control.CheckForIllegalCrossThreadCalls = false;
         }
         public chart(string cn, IPAddress IP,Socket clskt,int pt)
         {
@@ -50,6 +51,7 @@ namespace simTim
             this.friendsIP = IP;
             this.port = pt;
             this.label_hint.Text = "对方离线";
+            Control.CheckForIllegalCrossThreadCalls = false;
         }
 
         public void changesockets(Socket nclskt,string premsg)
