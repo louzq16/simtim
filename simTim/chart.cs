@@ -291,13 +291,18 @@ namespace simTim
             recvth.Start();
 
         }
+
+        //接收文件的函数
         private void recvfiletrans()
         {
             lock(this.progressBar_recvfile)
             {
+                //初始化变量
                 byte[] controlrecv = new byte[100];
                 int length = 0;
                 string rcfmsg = null;
+
+                //接收提示信息 want？filename？filesize
                 try
                 {
                     length = this.fileskt.Receive(controlrecv);
@@ -307,17 +312,24 @@ namespace simTim
                 {
                     MessageBox.Show(e.Message);
                 }
-                if (rcfmsg.Substring(0, 4) == "want")
+
+
+                if (rcfmsg.Substring(0, 4) == "want")//如果是want 说明要开始接收文件了
                 {
-                    int sizeeach = 128;
+                    int sizeeach = 128;//文件分块大小
                     string[] tem = rcfmsg.Split('?');
-                    // byte[] recv = new byte[long.Parse(tem[2])];
-                    FileStream fs = new FileStream(tem[1], FileMode.Create);
-                    this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
-                    byte[] temrecv = new byte[300 * 1024];
+                    FileStream fs = new FileStream(tem[1], FileMode.Create);//取出文件名
+
+
+                    this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));//向发送方发送提示信息OK，提示开始发送
+
+
+                    byte[] temrecv = new byte[2*sizeeach * 1024];
                     long number = long.Parse(tem[2]) / (sizeeach * 1024);
+
                     Console.WriteLine(number);
-                    this.progressBar_recvfile.Maximum = (int)number + 1;
+                    this.progressBar_recvfile.Maximum = (int)number + 1;//进度条设置
+
                     for (long i = 0; i < number; i++)
                     {
                         re: length = this.fileskt.Receive(temrecv);
@@ -330,53 +342,52 @@ namespace simTim
                         }
                         else
                         {
+                            Console.Write("error ");
                             this.fileskt.Send(Encoding.ASCII.GetBytes("NO" + Convert.ToString(i)));
                             goto re;
                         }
                        
                     }
+
+
                     number = long.Parse(tem[2]) % (sizeeach * 1024);
                     Array.Clear(temrecv, 0, temrecv.Length);
                     int recvnumber;
                     switch (number)
                     {
+                        case 0:
+                            recvnumber=this.fileskt.Receive(temrecv);
+                            fs.Close();
+                            this.fileskt.Close();
+                            break;
                         case 1:
-                            while (true)
-                            {
-                                recvnumber = this.fileskt.Receive(temrecv);
-                                if (recvnumber > 1)
-                                {
-                                    fs.Close();
-                                    this.fileskt.Close();
-                                    Console.WriteLine("recv ok");
-                                    break;
-                                }
-                                else
-                                {
-                                    fs.Write(temrecv, 0, 1);
-                                    this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
-                                    Console.WriteLine(recvnumber );
-                                }
-                            }
+                            recvnumber = this.fileskt.Receive(temrecv);                           
+                            fs.Write(temrecv, 0, 1);
+                            this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
+                            Console.WriteLine(recvnumber);
+                            this.fileskt.Receive(temrecv);
+                            fs.Close();
+                            this.fileskt.Close();
+                            Console.WriteLine("recv ok");
                             break;
                         default:
-                            while (true)
+                           reend: recvnumber = this.fileskt.Receive(temrecv);
+                            if (recvnumber == number)
                             {
-                                recvnumber = this.fileskt.Receive(temrecv);
-                                if (recvnumber == 1)
-                                {
-                                    fs.Close();
-                                    this.fileskt.Close();
-                                    Console.WriteLine("recv ok");
-                                    break;
-                                }
-                                else
-                                {
-                                    fs.Write(temrecv, 0, (int)number);
-                                    this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
-                                    Console.WriteLine(recvnumber);
-                                }
+                                fs.Write(temrecv, 0, (int)number);
+                                this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
+                                Console.WriteLine(recvnumber);
                             }
+                            else
+                            {
+                                this.fileskt.Send(Encoding.UTF8.GetBytes("NO"));
+                                Console.WriteLine(recvnumber);
+                                goto reend;
+                            }
+                            this.fileskt.Receive(temrecv);
+                            fs.Close();
+                            this.fileskt.Close();
+                            Console.WriteLine("recv ok");
                             break;
                     }
 
@@ -395,14 +406,12 @@ namespace simTim
             int sizeeach = 128;
             lock(this.progressBar_file)
             {
-                System.IO.FileInfo fileinfo = new System.IO.FileInfo(filepath);
+                System.IO.FileInfo fileinfo = new System.IO.FileInfo(filepath);//提取文件信息
                 long filesize = fileinfo.Length;
                 byte[] controlrecv = new byte[100];
-                this.progressBar_file.Maximum = (int)(filesize / (sizeeach * 1024))+1;
-                lock (this.progressBar_file)
-                {
 
-                }
+                this.progressBar_file.Maximum = (int)(filesize / (sizeeach * 1024))+1;//进度条
+
                 string rcvmsg = null;
                 int length;
                 this.fileskt.Send(Encoding.UTF8.GetBytes("want?" + this.filename + "?" + filesize));
@@ -413,7 +422,7 @@ namespace simTim
                     FileStream fread = new FileStream(filepath, FileMode.Open);
                     long number = filesize / (sizeeach * 1024);
                     Console.WriteLine(number);
-                    long offset = 0;
+
                     byte[] readbyte = new byte[sizeeach * 1024];
                     for (long i = 0; i < number; i++)
                     {
@@ -454,8 +463,12 @@ namespace simTim
                         default:
                             byte[] b = new byte[number];
                             fread.Read(b, 0, (int)number);
-                            this.fileskt.Send(b);
+                            resendend: this.fileskt.Send(b);
                             this.fileskt.Receive(controlrecv);
+                            if(Encoding.ASCII.GetString(controlrecv)!="OK")
+                            {
+                                goto resendend;
+                            }
                             goto case 0;
                     }
                 }
