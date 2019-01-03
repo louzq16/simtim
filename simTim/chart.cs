@@ -309,23 +309,33 @@ namespace simTim
                 }
                 if (rcfmsg.Substring(0, 4) == "want")
                 {
+                    int sizeeach = 128;
                     string[] tem = rcfmsg.Split('?');
                     // byte[] recv = new byte[long.Parse(tem[2])];
                     FileStream fs = new FileStream(tem[1], FileMode.Create);
                     this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
                     byte[] temrecv = new byte[300 * 1024];
-                    long number = long.Parse(tem[2]) / (256 * 1024);
+                    long number = long.Parse(tem[2]) / (sizeeach * 1024);
                     Console.WriteLine(number);
                     this.progressBar_recvfile.Maximum = (int)number + 1;
                     for (long i = 0; i < number; i++)
                     {
-                        length = this.fileskt.Receive(temrecv);
-                        Console.WriteLine(length+" "+ Convert.ToString(i));
-                        fs.Write(temrecv, 0, 256 * 1024);
-                        this.fileskt.Send(Encoding.UTF8.GetBytes("OK"+Convert.ToString(i)));
-                        this.progressBar_recvfile.Value++;
+                        re: length = this.fileskt.Receive(temrecv);
+                        if(length== sizeeach * 1024)//包长判断
+                        {
+                            Console.WriteLine(length + " " + Convert.ToString(i));
+                            fs.Write(temrecv, 0, sizeeach * 1024);
+                            this.fileskt.Send(Encoding.ASCII.GetBytes("OK" + Convert.ToString(i)));
+                            this.progressBar_recvfile.Value++;
+                        }
+                        else
+                        {
+                            this.fileskt.Send(Encoding.ASCII.GetBytes("NO" + Convert.ToString(i)));
+                            goto re;
+                        }
+                       
                     }
-                    number = long.Parse(tem[2]) % (256 * 1024);
+                    number = long.Parse(tem[2]) % (sizeeach * 1024);
                     Array.Clear(temrecv, 0, temrecv.Length);
                     int recvnumber;
                     switch (number)
@@ -382,12 +392,13 @@ namespace simTim
         }
         private  void sendfiletrans()
         {
+            int sizeeach = 128;
             lock(this.progressBar_file)
             {
                 System.IO.FileInfo fileinfo = new System.IO.FileInfo(filepath);
                 long filesize = fileinfo.Length;
                 byte[] controlrecv = new byte[100];
-                this.progressBar_file.Maximum = (int)(filesize / (256.0 * 1024))+1;
+                this.progressBar_file.Maximum = (int)(filesize / (sizeeach * 1024))+1;
                 lock (this.progressBar_file)
                 {
 
@@ -400,19 +411,28 @@ namespace simTim
                 if (rcvmsg == "OK")
                 {
                     FileStream fread = new FileStream(filepath, FileMode.Open);
-                    long number = filesize / (256 * 1024);
+                    long number = filesize / (sizeeach * 1024);
                     Console.WriteLine(number);
                     long offset = 0;
-                    byte[] readbyte = new byte[256 * 1024];
+                    byte[] readbyte = new byte[sizeeach * 1024];
                     for (long i = 0; i < number; i++)
                     {
-                        fread.Read(readbyte, 0, 256 * 1024);
-                        this.fileskt.Send(readbyte);
+                        fread.Read(readbyte, 0, sizeeach * 1024);
+
+                        resend: this.fileskt.Send(readbyte);
                         this.fileskt.Receive(controlrecv);
-                        Console.WriteLine(Encoding.UTF8.GetString(controlrecv, 0, 10));
-                        this.progressBar_file.Value++;
+                        if(Encoding.ASCII.GetString(controlrecv, 0, 2)=="OK")//ACK判断
+                        {
+                            Console.WriteLine(Encoding.ASCII.GetString(controlrecv, 0, 10));
+                            this.progressBar_file.Value++;
+                        }
+                       else
+                        {
+                            Console.WriteLine(Encoding.ASCII.GetString(controlrecv, 0, 10));
+                            goto resend;
+                        }
                     }
-                    number = filesize % (256 * 1024);
+                    number = filesize % (sizeeach * 1024);
                     switch (number)
                     {
                         case 0:
