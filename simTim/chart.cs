@@ -375,12 +375,12 @@ namespace simTim
                             if (recvnumber == number)
                             {
                                 fs.Write(temrecv, 0, (int)number);
-                                this.fileskt.Send(Encoding.UTF8.GetBytes("OK"));
+                                this.fileskt.Send(Encoding.ASCII.GetBytes("OK"));
                                 Console.WriteLine(recvnumber);
                             }
                             else
                             {
-                                this.fileskt.Send(Encoding.UTF8.GetBytes("NO"));
+                                this.fileskt.Send(Encoding.ASCII.GetBytes("NO"));
                                 Console.WriteLine(recvnumber);
                                 goto reend;
                             }
